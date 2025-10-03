@@ -29,23 +29,49 @@ class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
         try:
-                self.image = pygame.image.load('assets/astronaut.png').convert_alpha()
-                self.image = pygame.transform.scale(self.image, (TILE_SIZE, TILE_SIZE))
+            sheet = pygame.image.load('assets/robot-sprite-sheet.png').convert_alpha()
+            self.animations = {'down': [], 'right': [], 'up': [], 'left': []}
+            frame_w, frame_h = 150, 150
+            for row, direction in enumerate(['down', 'right', 'up', 'left']):
+                for col in range(8):
+                    frame = sheet.subsurface(pygame.Rect(col * frame_w, row * frame_h, frame_w, frame_h))
+                    frame = pygame.transform.scale(frame, (TILE_SIZE, TILE_SIZE))
+                    self.animations[direction].append(frame)
+            self.direction = 'down'
+            self.frame_index = 0
+            self.image = self.animations[self.direction][self.frame_index]
         except pygame.error:
             self.image = pygame.Surface((TILE_SIZE - 8, TILE_SIZE - 8))
             self.image.fill((255, 255, 255))
+            self.animations = {'down': [self.image], 'right': [self.image], 'up': [self.image], 'left': [self.image]}
+            self.direction = 'down'
+            self.frame_index = 0
         self.rect = self.image.get_rect(center=(x, y))
 
     def update(self):
         keys = pygame.key.get_pressed()
+        moved = False
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
             self.rect.x -= PLAYER_SPEED
-        if keys[pygame.K_RIGHT] or keys[pygame.K_d]:
+            self.direction = 'left'
+            moved = True
+        elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
             self.rect.x += PLAYER_SPEED
-        if keys[pygame.K_UP] or keys[pygame.K_w]:
+            self.direction = 'right'
+            moved = True
+        elif keys[pygame.K_UP] or keys[pygame.K_w]:
             self.rect.y -= PLAYER_SPEED
-        if keys[pygame.K_DOWN] or keys[pygame.K_s]:
+            self.direction = 'up'
+            moved = True
+        elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
             self.rect.y += PLAYER_SPEED
+            self.direction = 'down'
+            moved = True
+        if moved:
+            self.frame_index = (self.frame_index + 1) % 8
+        else:
+            self.frame_index = 0
+        self.image = self.animations[self.direction][self.frame_index]
 
 class Camera:
     def __init__(self, width, height):
