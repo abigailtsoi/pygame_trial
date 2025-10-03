@@ -132,22 +132,42 @@ def main():
     clock = pygame.time.Clock()
 
     # Load assets or create placeholders
+    import random
     try:
-           sand_tile = pygame.image.load('assets/sand.png').convert()
-           sand_tile = pygame.transform.scale(sand_tile, (RENDER_SIZE, RENDER_SIZE))
-           rock_tile = pygame.image.load('assets/rocks.png').convert()
-           rock_tile = pygame.transform.scale(rock_tile, (RENDER_SIZE, RENDER_SIZE))
-           crater_tile = pygame.image.load('assets/crater.png').convert()
-           crater_tile = pygame.transform.scale(crater_tile, (RENDER_SIZE, RENDER_SIZE))
+        sand_tile_images = []
+        for sand_img in ['sand-bushes.png', 'sand-line.png', 'sand-rocks.png']:
+            img = pygame.image.load(f'assets/{sand_img}').convert()
+            img = pygame.transform.scale(img, (RENDER_SIZE, RENDER_SIZE))
+            sand_tile_images.append(img)
+        rock_tile = pygame.image.load('assets/rocks.png').convert()
+        rock_tile = pygame.transform.scale(rock_tile, (RENDER_SIZE, RENDER_SIZE))
+        crater_tile = pygame.image.load('assets/crater.png').convert()
+        crater_tile = pygame.transform.scale(crater_tile, (RENDER_SIZE, RENDER_SIZE))
     except pygame.error:
-        sand_tile = pygame.Surface((TILE_SIZE, TILE_SIZE))
-        sand_tile.fill((194, 178, 128))
+        sand_tile_images = []
+        for _ in range(3):
+            surf = pygame.Surface((TILE_SIZE, TILE_SIZE))
+            surf.fill((194, 178, 128))
+            sand_tile_images.append(surf)
         rock_tile = pygame.Surface((TILE_SIZE, TILE_SIZE))
         rock_tile.fill((112, 128, 144))
         crater_tile = pygame.Surface((TILE_SIZE, TILE_SIZE))
         crater_tile.fill((160, 82, 45))
-        
-    tile_images = {0: sand_tile, 1: rock_tile, 2: crater_tile}
+    # Precompute tile images for each map location so sand tiles don't change every frame
+    map_tile_images = []
+    for row in GAME_MAP:
+        map_row = []
+        for tile in row:
+            if tile == 0:
+                img = random.choice(sand_tile_images)
+            elif tile == 1:
+                img = rock_tile
+            elif tile == 2:
+                img = crater_tile
+            else:
+                img = pygame.Surface((RENDER_SIZE, RENDER_SIZE))
+            map_row.append(img)
+        map_tile_images.append(map_row)
 
     # Find a sand tile to spawn the player
     spawn_x, spawn_y = None, None
@@ -185,7 +205,7 @@ def main():
                 x = col_index * RENDER_SIZE
                 y = row_index * RENDER_SIZE
                 tile_rect = pygame.Rect(x, y, RENDER_SIZE, RENDER_SIZE)
-                screen.blit(tile_images[tile], tile_rect.move(camera.camera.topleft))
+                screen.blit(map_tile_images[row_index][col_index], tile_rect.move(camera.camera.topleft))
 
         # Draw the player
         screen.blit(player.image, camera.apply(player))
