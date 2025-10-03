@@ -12,19 +12,13 @@ RENDER_SIZE = TILE_SIZE * ZOOM
 # --- Colors ---
 REDDISH_BROWN = (139, 69, 19)
 
+from game_map import generate_game_map, SAND
+
 # --- Game Map ---
 # 0 = Sand, 1 = Rocks, 2 = Crater
-GAME_MAP = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 2, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 1],
-    [1, 0, 2, 2, 2, 2, 0, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 1],
-    [1, 0, 0, 2, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-]
+MAP_WIDTH = 100
+MAP_HEIGHT = 100
+GAME_MAP = generate_game_map(MAP_WIDTH, MAP_HEIGHT)
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, tile_x, tile_y):
@@ -173,7 +167,7 @@ def main():
     spawn_x, spawn_y = None, None
     for y, row in enumerate(GAME_MAP):
         for x, tile in enumerate(row):
-            if tile == 0:
+            if tile == SAND:
                 spawn_x, spawn_y = x, y
                 break
         if spawn_x is not None:
